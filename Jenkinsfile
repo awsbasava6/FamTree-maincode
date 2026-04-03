@@ -8,16 +8,16 @@ pipeline {
             }
         }
 
-        stage('Build Test') {
+        //stage('Build Test') {
             steps {
                 sh 'echo "Build started..."'
                 sh 'node -v || true'
                 sh 'npm -v || true'
-            }
+            }//
         
-stage('SonarQube Scan') {
-    steps {
-        withSonarQubeEnv('sonar-server') {
+      stage('SonarQube Scan') {
+        steps {
+          withSonarQubeEnv('sonar-server') {
             sh '''
             sonar-scanner \
             -Dsonar.projectKey=jen-sonar \
