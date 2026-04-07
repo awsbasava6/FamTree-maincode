@@ -12,9 +12,10 @@ function SelectAccount() {
     if (!phoneNumber) return alert("No phone number found!");
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:5000/api/auth/send-otp", {
+          axios.post(`${import.meta.env.VITE_API_URL}/auth/verify-otp`)
+
         phoneNumber,
-      });
+      }
       if (res.data.success) navigate("/verify-otp");
     } catch {
       alert("Error sending OTP");
