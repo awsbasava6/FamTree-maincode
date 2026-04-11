@@ -1,4 +1,5 @@
 
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -10,14 +11,21 @@ function SelectAccount() {
 
   const handleCreateAccount = async () => {
     if (!phoneNumber) return alert("No phone number found!");
+
     try {
       setLoading(true);
-          axios.post(`${import.meta.env.VITE_API_URL}/auth/verify-otp`)
 
-        phoneNumber,
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/send-otp`,
+        { phoneNumber }
+      );
+
+      if (res.data.success) {
+        navigate("/verify-otp");
       }
-      if (res.data.success) navigate("/verify-otp");
-    } catch {
+
+    } catch (err) {
+      console.error(err);
       alert("Error sending OTP");
     } finally {
       setLoading(false);
@@ -28,6 +36,7 @@ function SelectAccount() {
     <div className="flex justify-center items-center min-h-screen bg-purple-50">
       <div className="bg-white p-6 rounded-2xl shadow-lg w-96 text-center">
         <h2 className="text-xl font-semibold mb-6">Select Account</h2>
+
         <button
           onClick={handleCreateAccount}
           disabled={loading}
