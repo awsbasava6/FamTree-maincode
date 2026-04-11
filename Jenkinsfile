@@ -2,15 +2,10 @@ pipeline {
     agent any
 
     environment {
-
-        DOCKERHUB_REPO = "https://hub.docker.com/repositories/awsbasava6/famtree"
-
-        DOCKER_USER = "awsbasava6"
-
+        DOCKERHUB_REPO = "awsbasava6/famtree"
     }
 
     stages {
-
 
         stage('Checkout') {
             steps {
@@ -21,6 +16,8 @@ pipeline {
         stage('Build Test') {
             steps {
                 sh 'echo "Build started..."'
+                sh 'node -v || true'
+                sh 'npm -v || true'
             }
         }
 
@@ -33,35 +30,6 @@ pipeline {
         stage('Test Docker') {
             steps {
                 sh 'docker images'
-
-        stage('Cleanup') {
-            steps {
-                sh 'docker rm -f famtree-server || true'
-            }
-        }
-
-        stage('Build Image') {
-            steps {
-                sh 'cd server && docker build -t $DOCKER_USER/famtree-server .'
-            }
-        }
-
-        stage('Login DockerHub') {
-            steps {
-                sh 'echo "Awsbasava06@" | docker login -u $DOCKER_USER --password-stdin'
-            }
-        }
-
-        stage('Push Image') {
-            steps {
-                sh 'docker push $DOCKER_USER/famtree-server'
-            }
-        }
-
-        stage('Run Container') {
-            steps {
-                sh 'docker run -d -p 5000:5000 --name famtree-server $DOCKER_USER/famtree-server'
-
             }
         }
 
