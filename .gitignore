@@ -1,6 +1,11 @@
 node_modules/
+.env
 dist/
 build/
-.env
 *.log
 coverage/
+<<<<<<< HEAD
+=======
+.gitconfig
+
+>>>>>>> 97bcb1049aacf11ec16d3c1458a35d6cca7285c3
