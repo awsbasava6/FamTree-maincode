@@ -1,45 +1,65 @@
-import React from "react";
-import { FaImage, FaVideo, FaFileAlt } from "react-icons/fa";
+import React, { useState } from "react";
+import API from "../api";
 
-export default function UploadPage({ title, subtitle, bgImage }) {
+function UploadPage() {
+  const [file, setFile] = useState(null);
+  const [uploadedUrl, setUploadedUrl] = useState("");
+
+  const handleUpload = async () => {
+    if (!file) return alert("Select file first");
+
+    try {
+      // STEP 1: Get signed URL from backend
+      const res = await API.get("/upload-url");
+
+      const { url, key } = res.data;
+
+      // STEP 2: Upload file directly to S3
+      await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": file.type,
+        },
+        body: file,
+      });
+
+      // STEP 3: Construct final file URL
+      const fileUrl = `${import.meta.env.VITE_S3_BASE_URL}/${key}`;
+
+      setUploadedUrl(fileUrl);
+
+      alert("Upload successful!");
+
+    } catch (err) {
+      console.error(err);
+      alert("Upload failed");
+    }
+  };
+
   return (
-    <div
-      className="min-h-screen bg-cover bg-center flex flex-col items-center p-10"
-      style={{ backgroundImage: `url(${bgImage})` }}
-    >
-      <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-3">
-        {title}
-      </h1>
-      <p className="text-white/90 text-lg mb-10 drop-shadow-md text-center max-w-3xl">
-        {subtitle}
-      </p>
+    <div style={{ padding: "20px" }}>
+      <h2>Upload File</h2>
 
-      {/* Upload Options */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
-        
-        {/* Images */}
-        <div className="bg-white/90 p-8 rounded-2xl shadow-xl text-center hover:scale-105 transition">
-          <FaImage className="text-blue-600 text-5xl mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Upload Images</h2>
-          <p className="text-gray-700">Add photos and visual memories.</p>
+      <input
+        type="file"
+        onChange={(e) => setFile(e.target.files[0])}
+      />
+
+      <br /><br />
+
+      <button onClick={handleUpload}>
+        Upload
+      </button>
+
+      {uploadedUrl && (
+        <div>
+          <p>Uploaded URL:</p>
+          <a href={uploadedUrl} target="_blank">{uploadedUrl}</a>
         </div>
-
-        {/* Videos */}
-        <div className="bg-white/90 p-8 rounded-2xl shadow-xl text-center hover:scale-105 transition">
-          <FaVideo className="text-red-600 text-5xl mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Upload Videos</h2>
-          <p className="text-gray-700">Upload videos of precious moments.</p>
-        </div>
-
-        {/* Documents */}
-        <div className="bg-white/90 p-8 rounded-2xl shadow-xl text-center hover:scale-105 transition">
-          <FaFileAlt className="text-green-700 text-5xl mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Upload Documents</h2>
-          <p className="text-gray-700">Certificates, report cards, and more.</p>
-        </div>
-
-      </div>
+      )}
     </div>
   );
 }
+
+export default UploadPage;
 
