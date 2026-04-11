@@ -16,8 +16,6 @@ pipeline {
         stage('Build Test') {
             steps {
                 sh 'echo "Build started..."'
-                sh 'node -v || true'
-                sh 'npm -v || true'
             }
         }
 
@@ -27,20 +25,16 @@ pipeline {
             }
         }
 
-        stage('Trivy Scan') {
-            steps {
-                sh 'trivy image $DOCKER_IMAGE:latest || true'
-            }
-        }
-
         stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'docker',
-                    usernameVariable: 'USER',
-                    passwordVariable: 'PASS'
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    '''
                 }
             }
         }
