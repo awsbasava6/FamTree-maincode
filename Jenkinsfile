@@ -2,10 +2,37 @@ pipeline {
     agent any
 
     environment {
+
+        DOCKERHUB_REPO = "https://hub.docker.com/repositories/awsbasava6/famtree"
+
         DOCKER_USER = "awsbasava6"
+
     }
 
     stages {
+
+
+        stage('Checkout') {
+            steps {
+                git branch: 'dev', url: 'https://github.com/awsbasava6/FamTree-maincode.git'
+            }
+        }
+
+        stage('Build Test') {
+            steps {
+                sh 'echo "Build started..."'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t $DOCKERHUB_REPO-server:latest ./server'
+            }
+        }
+
+        stage('Test Docker') {
+            steps {
+                sh 'docker images'
 
         stage('Cleanup') {
             steps {
@@ -34,9 +61,9 @@ pipeline {
         stage('Run Container') {
             steps {
                 sh 'docker run -d -p 5000:5000 --name famtree-server $DOCKER_USER/famtree-server'
+
             }
         }
 
     }
 }
-
