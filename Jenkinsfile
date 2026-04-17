@@ -2,41 +2,48 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_USER = "awsbasava6"
+        DOCKER_IMAGE = "awsbasava6/famtree-server"
     }
 
     stages {
 
-        stage('Cleanup') {
+        stage('Checkout') {
             steps {
-                sh 'docker rm -f famtree-server || true'
+                git branch: 'dev', url: 'https://github.com/awsbasava6/FamTree-maincode.git'
             }
         }
 
-        stage('Build Image') {
+        stage('Build Test') {
             steps {
-                sh 'cd server && docker build -t $DOCKER_USER/famtree-server .'
+                sh 'echo "Build started..."'
             }
         }
 
-        stage('Login DockerHub') {
+        stage('Docker Build') {
             steps {
-                sh 'echo "Awsbasava06@" | docker login -u $DOCKER_USER --password-stdin'
+                sh 'docker build -t $DOCKER_IMAGE:latest ./server'
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    '''
+                }
             }
         }
 
         stage('Push Image') {
             steps {
-                sh 'docker push $DOCKER_USER/famtree-server'
-            }
-        }
-
-        stage('Run Container') {
-            steps {
-                sh 'docker run -d -p 5000:5000 --name famtree-server $DOCKER_USER/famtree-server'
+                sh 'docker push $DOCKER_IMAGE:latest'
             }
         }
 
     }
 }
-
